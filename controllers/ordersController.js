@@ -115,6 +115,12 @@ const postPurchaseCart = catchAsync(async (req, res, next) => {
 });
 
 const deleteProductFromCart = catchAsync(async (req, res, next) => {
+  // const { productId } = req.body;
+
+  // const cartId = req.user.cart.id;
+
+  // const removeProduct = await inCart.delete({});
+
   res.status(200).json({ status: 'success' });
 });
 

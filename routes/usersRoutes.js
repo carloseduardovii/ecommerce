@@ -29,9 +29,19 @@ const {
   checkToken,
 } = require('../controllers/userController');
 
+//utils
+const { upload } = require('../utils/multer');
+
 const router = express.Router();
 
-router.route('/').post(createUserValidations, checkValidations, postUser);
+router
+  .route('/')
+  .post(
+    upload.single('profileImg'),
+    createUserValidations,
+    checkValidations,
+    postUser
+  );
 
 router.post('/login', login);
 
@@ -39,6 +49,7 @@ router.post('/login', login);
 //router.use(protectToken);
 
 router.route('/').get(getAllUsers);
+router.route('/:id').get(getUserById);
 router.route('/me').get(vendor, getUserProducts);
 router.route('/orders').get(getUserOrders);
 

@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 
 //models
 const { User } = require('../models/userModel');
@@ -11,7 +12,7 @@ const { Order } = require('../models/orderModel');
 //utils
 const { catchAsync } = require('../utils/catchAsync');
 const { AppError } = require('../utils/appError');
-const res = require('express/lib/response');
+const { storage } = require('../utils/firebase');
 
 dotenv.config({ path: './set.env' });
 
@@ -21,10 +22,18 @@ const getAllUsers = catchAsync(async (req, res, next) => {
   res.status(200).json({ users });
 });
 
-const getUserById = catchAsync(async (req, rs, next) => {
+const getUserById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
+  //const { user } = req;
 
-  const user = await User.findOne({ where: { id, status: 'active' } });
+  const user = await User.findOne({
+    where: { id, status: 'active' },
+    attributes: { exclude: ['password'] },
+  });
+  const imgRef = ref(storage, user.profileImgUrl);
+  const url = await getDownloadURL(imgRef);
+
+  user.profileImgUrl = url;
 
   res.status(200).json({ user });
 });
@@ -32,6 +41,12 @@ const getUserById = catchAsync(async (req, rs, next) => {
 const postUser = catchAsync(async (req, res, next) => {
   const { userName, email, password, role } = req.body;
 
+  //console.log(req.file);
+
+  const imgRef = ref(storage, `users/${Date.now()}-${req.file.originalname}`);
+  const imgUploaded = await uploadBytes(imgRef, req.file.buffer);
+
+  console.log(imgUploaded);
   const salt = await bcrypt.genSalt(12);
   const hashPass = await bcrypt.hash(password, salt);
 
@@ -40,6 +55,7 @@ const postUser = catchAsync(async (req, res, next) => {
     email,
     password: hashPass,
     role,
+    profileImgUrl: imgUploaded.metadata.fullPath,
   });
 
   newUser.password = undefined;
