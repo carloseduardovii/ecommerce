@@ -8,6 +8,9 @@ const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { User } = require('../models/userModel');
 const { Product } = require('../models/productModel');
 const { Order } = require('../models/orderModel');
+const { Cart } = require('../models/cartModel');
+const { inCart } = require('../models/productInCart');
+const { Category } = require('../models/categoryModel');
 
 //utils
 const { catchAsync } = require('../utils/catchAsync');
@@ -27,8 +30,8 @@ const getUserById = catchAsync(async (req, res, next) => {
   //const { user } = req;
 
   const user = await User.findOne({
-    where: { id, status: 'active' },
-    attributes: { exclude: ['password'] },
+    id,
+    status: 'active',
   });
   const imgRef = ref(storage, user.profileImgUrl);
   const url = await getDownloadURL(imgRef);
@@ -82,9 +85,11 @@ const login = catchAsync(async (req, res, next) => {
 
 const getUserProducts = catchAsync(async (req, res, next) => {
   const { sessionUser } = req;
-  const userProducts = await Product.findAll();
+  const userProducts = await Product.findAll({
+    where: { userId: sessionUser.id, status: 'active' },
+  });
 
-  sessionUser;
+  //sessionUser;
 
   res.status(200).json({ userProducts });
 });
@@ -102,15 +107,44 @@ const patchUserId = catchAsync(async (req, res, next) => {
 const deleteUserId = catchAsync(async (req, res, next) => {
   const { user } = req;
 
-  await user.update({ status: 'deactive' });
+  await user.update({ status: 'deactived' });
 
   res.status(200).json({ status: 'User was deactived' });
 });
 
 const getUserOrders = catchAsync(async (req, res, next) => {
-  const ordersUser = await Order.findAll();
+  const { sessionUser } = req;
 
-  res.status(200).json({ ordersUser });
+  const orders = await Order.findAll({
+    where: { userId: sessionUser.id },
+    attributes: ['id', 'totalPrice', 'createdAt'],
+    include: [
+      {
+        model: Cart,
+        attributes: ['id', 'status'],
+        include: [
+          {
+            model: inCart,
+            attributes: ['quantity', 'status'],
+            include: [
+              {
+                model: Product,
+                attributes: ['id', 'title', 'description', 'price'],
+                include: [
+                  {
+                    model: Category,
+                    attributes: ['name'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  res.status(200).json({ orders });
 });
 
 const getUserOrderId = catchAsync(async (req, res, next) => {

@@ -51,15 +51,13 @@ router.post('/login', login);
 router.route('/').get(getAllUsers);
 router.route('/:id').get(getUserById);
 router.route('/me').get(vendor, getUserProducts);
-router.route('/orders').get(getUserOrders);
+//router.route('/orders').get(getUserOrders);
 
 router
   .route('/:id')
   .get(userExists, getUserById)
   .patch(userExists, protectAccountOwner, patchUserId)
   .delete(userExists, protectAccountOwner, deleteUserId);
-
-router.route('/orders/:id').get(getUserOrderId);
 
 router.get('/check-token', checkToken);
 
