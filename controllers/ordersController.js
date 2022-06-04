@@ -14,7 +14,7 @@ const getAllCarts = catchAsync(async (req, res, next) => {
     include: [
       {
         model: inCart,
-        attributes: ['productId', 'quantity'],
+        attributes: ['productId', 'quantity', 'status'],
         include: [
           { model: Product, attributes: ['title', 'description', 'price'] },
         ],
@@ -27,7 +27,6 @@ const getAllCarts = catchAsync(async (req, res, next) => {
 
 const postProductToCart = catchAsync(async (req, res, next) => {
   const { productId, quantity } = req.body;
-
   const { sessionUser } = req;
 
   // Validate that the productp has enough stock for the cart
@@ -37,7 +36,7 @@ const postProductToCart = catchAsync(async (req, res, next) => {
 
   if (!product) {
     return next(new AppError('Product not found un your order', 404));
-  } else if (quantity > product.quantity) {
+  } else if (quantity < 0 || quantity > product.quantity) {
     return next(
       new AppError(
         `There are only ${product.quantity} units of this product available`,
@@ -69,7 +68,7 @@ const postProductToCart = catchAsync(async (req, res, next) => {
       return next(
         new AppError('This product already exists in your order', 400)
       );
-    } else if (productInCart && productInCart.status === 'active') {
+    } else if (productInCart && productInCart.status === 'removed') {
       await productInCart.update({ status: 'active', quantity });
     } else if (!productInCart) {
       // Add product to current cart
@@ -77,7 +76,7 @@ const postProductToCart = catchAsync(async (req, res, next) => {
     }
   }
 
-  res.status(201).json({ status: 'Your product has been added successfully' });
+  res.status(200).json({ status: 'Your product has been added successfully' });
 });
 
 const patchProductToCart = catchAsync(async (req, res, next) => {
@@ -85,8 +84,7 @@ const patchProductToCart = catchAsync(async (req, res, next) => {
   const { sessionUser } = req;
 
   const cart = await Cart.findOne({
-    where: { status: 'active' },
-    userId: sessionUser.id,
+    where: { status: 'active', userId: sessionUser.id },
   });
 
   if (!cart) {
@@ -103,7 +101,12 @@ const patchProductToCart = catchAsync(async (req, res, next) => {
   }
 
   if (newQuantity < 0 || newQuantity > productInCart.product.quantity) {
-    return next(new AppError(`${productInCart.product.quantity}`, 400));
+    return next(
+      new AppError(
+        `Invalid selected quantity, this product only has ${productInCart.product.quantity} items available`,
+        400
+      )
+    );
   }
 
   if (newQuantity === 0) {
@@ -165,6 +168,16 @@ const postPurchaseCart = catchAsync(async (req, res, next) => {
 });
 
 const deleteProductFromCart = catchAsync(async (req, res, next) => {
+  const { productId } = req.params;
+
+  const removeProduct = await inCart.findOne({ productId });
+
+  if (inCart.quantity === 0) {
+    await inCart.update({ status: 'removed' });
+  }
+
+  await removeProduct.update({ status: 'removed' });
+
   res.status(200).json({ status: 'success' });
 });
 
