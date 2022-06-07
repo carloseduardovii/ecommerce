@@ -14,9 +14,13 @@ const getAllCarts = catchAsync(async (req, res, next) => {
     include: [
       {
         model: inCart,
+        where: { status: 'active' },
         attributes: ['productId', 'quantity', 'status'],
         include: [
-          { model: Product, attributes: ['title', 'description', 'price'] },
+          {
+            model: Product,
+            attributes: ['title', 'description', 'price'],
+          },
         ],
       },
     ],
@@ -140,16 +144,16 @@ const postPurchaseCart = catchAsync(async (req, res, next) => {
 
   let totalPrice = 0;
 
-  const cartPromises = cart.productInCarts.map(async productInCart => {
-    const updateQty = productInCart.product.quantity - productInCart.quantity;
+  const cartPromises = cart.productInCart.map(async products => {
+    const updateQty = products.product.quantity - products.quantity;
 
-    await productInCart.product.update({ quantity: updateQty });
+    await products.product.update({ quantity: updateQty });
 
-    const productPrice = productInCart.quantity * +productInCart.product.price;
+    const productPrice = products.quantity * +products.product.price;
 
     totalPrice += productPrice;
 
-    return await productInCart.update({ status: 'purchased' });
+    return await products.update({ status: 'purchased' });
   });
 
   await Promise.all(cartPromises);
@@ -160,7 +164,7 @@ const postPurchaseCart = catchAsync(async (req, res, next) => {
     totalPrice,
   });
 
-  await cart.update({ status: 'purchased' });
+  await cart.update({ status: 'purchased', newOrder });
 
   res
     .status(200)

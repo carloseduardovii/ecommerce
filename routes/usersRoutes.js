@@ -50,7 +50,7 @@ router.post('/login', login);
 
 router.route('/').get(getAllUsers);
 router.route('/:id').get(getUserById);
-router.route('/me').get(vendor, getUserProducts);
+router.route('/me').get(admin, getUserProducts);
 //router.route('/orders').get(getUserOrders);
 
 router

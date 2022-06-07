@@ -28,10 +28,10 @@ const router = express.Router();
 router.route('/').get(getAllProducts);
 
 router.use(protectToken);
-router.route('/').post(vendor, postProduct);
+router.route('/').post(admin, postProduct);
 router
   .route('/:id')
-  .get(vendor, getProductById)
+  .get(admin, getProductById)
   .patch(protectProductOwner, patchProduct)
   .delete(protectProductOwner, deleteProduct);
 

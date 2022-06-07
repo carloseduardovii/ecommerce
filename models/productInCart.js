@@ -11,7 +11,6 @@ const inCart = db.define('inCart', {
   cartId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true,
   },
   productId: {
     type: DataTypes.INTEGER,
