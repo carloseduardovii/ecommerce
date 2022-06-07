@@ -144,16 +144,18 @@ const postPurchaseCart = catchAsync(async (req, res, next) => {
 
   let totalPrice = 0;
 
-  const cartPromises = cart.productInCart.map(async products => {
-    const updateQty = products.product.quantity - products.quantity;
+  const cartPromises = cart.inCarts.map(async inCart => {
+    //  Substract to stock
+    const updatedQty = inCart.product.quantity - inCart.quantity;
 
-    await products.product.update({ quantity: updateQty });
+    await inCart.product.update({ quantity: updatedQty });
 
-    const productPrice = products.quantity * +products.product.price;
-
+    //  Calculate total price
+    const productPrice = inCart.quantity * +inCart.product.price;
     totalPrice += productPrice;
 
-    return await products.update({ status: 'purchased' });
+    //  Mark products to status purchased
+    return await inCart.update({ status: 'purchased' });
   });
 
   await Promise.all(cartPromises);
