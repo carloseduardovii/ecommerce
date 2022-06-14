@@ -34,4 +34,4 @@ else config = credentials.production;
 
 const database = new Sequelize(config);
 
-module.exports = { db };
+module.exports = { database };
