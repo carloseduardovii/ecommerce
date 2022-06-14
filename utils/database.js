@@ -32,6 +32,6 @@ let config = {};
 if (process.env.NODE_ENV === 'development') config = credentials.development;
 else config = credentials.production;
 
-const database = new Sequelize(config);
+const db = new Sequelize(config);
 
-module.exports = { database };
+module.exports = { db };
