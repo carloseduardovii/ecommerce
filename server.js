@@ -21,6 +21,7 @@ db.sync()
 
 // Spin up server
 const PORT = process.env.PORT || 4000;
+//https://ecommercewithheroku.herokuapp.com
 
 app.listen(PORT, () => {
   console.log(`Express app running on port: ${PORT}`);
