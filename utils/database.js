@@ -12,12 +12,12 @@ const credentials = {
     logging: false,
   },
   production: {
-    // dialect: 'postgres',
     // host: process.env.DB_HOST,
     // username: process.env.DB_USER,
     // password: process.env.DB_PASS,
     // database: process.env.DB,
     use_env_variable: process.env.DATABASE_URL,
+    dialect: 'postgres',
     logging: false,
     dialectOptions: {
       ssl: {
