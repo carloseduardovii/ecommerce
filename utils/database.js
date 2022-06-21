@@ -17,7 +17,7 @@ const credentials = {
     // username: process.env.DB_USER,
     // password: process.env.DB_PASS,
     // database: process.env.DB,
-    use_env_variable: 'DATABASE_URL',
+    use_env_variable: process.env.DATABASE_URL,
     logging: false,
     dialectOptions: {
       ssl: {
