@@ -6,7 +6,7 @@ const credentials = {
   development: {
     dialect: 'postgres',
     host: process.env.DB_HOST,
-    username: process.env.DB_USER_NAME,
+    username: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB,
     logging: false,
@@ -14,7 +14,7 @@ const credentials = {
   production: {
     // dialect: 'postgres',
     // host: process.env.DB_HOST,
-    // username: process.env.DB_USER_NAME,
+    // username: process.env.DB_USER,
     // password: process.env.DB_PASS,
     // database: process.env.DB,
     use_env_variable: 'DATABASE_URL',
@@ -32,7 +32,7 @@ let config = {};
 
 if (process.env.NODE_ENV === 'development') config = credentials.development;
 else config = credentials.production;
-
+console.log(config);
 const db = new Sequelize(config);
 
 module.exports = { db };
