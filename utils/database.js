@@ -16,14 +16,10 @@ const credentials = {
     // username: process.env.DB_USER,
     // password: process.env.DB_PASS,
     // database: process.env.DB,
-    use_env_variable: process.env.DATABASE_URL,
+    use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
-    logging: false,
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: true,
     },
   },
 };
